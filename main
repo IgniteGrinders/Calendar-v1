@@ -1,0 +1,99 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkcalendar import Calendar
+
+class CalendarApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Calendar App")
+
+        # Dictionary to store events
+        self.events = {}
+
+        # Create UI elements
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Frame for calendar and buttons
+        frame = tk.Frame(self.root)
+        frame.pack(padx=20, pady=20)
+
+        # Calendar widget
+        self.calendar = Calendar(frame, selectmode='day', date_pattern='yyyy-mm-dd', font=('Arial', 14))
+        self.calendar.pack(side=tk.TOP, padx=10, pady=10)
+
+        # Event entry
+        self.event_entry = tk.Entry(frame, font=('Arial', 12))
+        self.event_entry.pack(pady=10)
+
+        # Buttons frame
+        buttons_frame = tk.Frame(frame)
+        buttons_frame.pack(pady=10)
+
+        # Add Event button
+        add_event_button = tk.Button(buttons_frame, text="Add Event", command=self.add_event, font=('Arial', 12))
+        add_event_button.pack(side=tk.LEFT, padx=5)
+
+        # Delete Event button
+        delete_event_button = tk.Button(buttons_frame, text="Delete Event", command=self.delete_event, font=('Arial', 12))
+        delete_event_button.pack(side=tk.LEFT, padx=5)
+
+        # View Events button
+        view_event_button = tk.Button(buttons_frame, text="View Events", command=self.view_events, font=('Arial', 12))
+        view_event_button.pack(side=tk.LEFT, padx=5)
+
+        # Label for month and year
+        self.month_year_label = tk.Label(frame, text="", font=('Arial', 16, 'bold'), fg='black')
+        self.month_year_label.pack()
+
+        # Update month and year label initially
+        self.update_month_year_label()
+
+    def update_month_year_label(self):
+        # Update the month and year label based on selected date
+        selected_date = self.calendar.get_date()
+        month_year = selected_date[:7]  # Get yyyy-mm part for display
+        self.month_year_label.config(text=month_year)
+
+    def add_event(self):
+        selected_date = self.calendar.get_date()
+        event = self.event_entry.get().strip()
+
+        if event:
+            if selected_date in self.events:
+                self.events[selected_date].append(event)
+            else:
+                self.events[selected_date] = [event]
+            messagebox.showinfo("Success", "Event added successfully.")
+            self.event_entry.delete(0, 'end')
+        else:
+            messagebox.showwarning("Warning", "Event cannot be empty.")
+
+    def delete_event(self):
+        selected_date = self.calendar.get_date()
+        event_to_delete = self.event_entry.get().strip()
+
+        if selected_date in self.events and event_to_delete:
+            if event_to_delete in self.events[selected_date]:
+                self.events[selected_date].remove(event_to_delete)
+                if not self.events[selected_date]:
+                    del self.events[selected_date]
+                messagebox.showinfo("Success", "Event deleted successfully.")
+            else:
+                messagebox.showwarning("Warning", "Event not found.")
+        else:
+            messagebox.showwarning("Warning", "Please select a date and enter event to delete.")
+
+    def view_events(self):
+        selected_date = self.calendar.get_date()
+
+        if selected_date in self.events:
+            events = "\n".join(self.events[selected_date])
+            messagebox.showinfo(f"Events on {selected_date}", events)
+        else:
+            messagebox.showinfo(f"No Events on {selected_date}", "No events found for selected date.")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = CalendarApp(root)
+    root.mainloop()
